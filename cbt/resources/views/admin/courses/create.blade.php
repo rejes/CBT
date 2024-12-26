@@ -12,7 +12,7 @@
         <div id="sidebar" class="w-[270px] flex flex-col shrink-0 min-h-screen justify-between p-[30px] border-r border-[#EEEEEE] bg-[#FBFBFB]">
             <div class="w-full flex flex-col gap-[30px]">
                 <a href="index.html" class="flex items-center justify-center">
-                    <img src="{{asset('images/logo/logo.svg')}}')}}" alt="logo">
+                    <img src="{{asset('images/logo/logo.svg')}}" alt="logo">
                 </a>
                 <ul class="flex flex-col gap-3">
                     <li>
@@ -154,7 +154,18 @@
                 <h1 class="font-extrabold text-[30px] leading-[45px]">New Course</h1>
                 <p class="text-[#7F8190]">Provide high quality for best students</p>
             </div>
-            <form method="POST" action="{{route('dashboard.courses.store')}}" class="flex flex-col gap-[30px] w-[500px] mx-[70px] mt-10">
+
+            @if ($errors->any())
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li class="py-5 px-5 bg-red-700 text-white">
+                        {{$error}}
+                    </li>
+                @endforeach
+            </ul>
+            @endif
+
+            <form method="POST" enctype="multipart/form-data" action="{{route('dashboard.courses.store')}}" class="flex flex-col gap-[30px] w-[500px] mx-[70px] mt-10">
                 @csrf
                 <div class="flex gap-5 items-center">
                     <input type="file" name="cover" id="icon" class="peer hidden" onchange="previewFile()" data-empty="true" required>
@@ -255,8 +266,8 @@
                         </div>
                         <select id="access" class="pl-1 font-semibold focus:outline-none w-full text-[#0A090B] invalid:text-[#7F8190] invalid:font-normal appearance-none bg-[url('{{asset('images/icons/arrow-down.svg')}}')] bg-no-repeat bg-right" name="access" required>
                             <option value="" disabled selected hidden>Choose the access type</option>
-                            <option value="a" class="font-semibold">Digital Marketing</option>
-                            <option value="b" class="font-semibold">Web Development</option>
+                            <option value="Invitation Only" class="font-semibold">Invitation</option>
+
                         </select>
                     </div>
                 </div>
