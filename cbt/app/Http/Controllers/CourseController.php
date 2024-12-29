@@ -8,6 +8,8 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Contracts\Support\ValidatedData;
+
 
 class CourseController extends Controller
 {
@@ -16,8 +18,10 @@ class CourseController extends Controller
      */
     public function index()
     {
-        //
-        return view('admin.courses.index');
+        $courses = Course::orderBy('id', 'DESC')->get();
+        return view('teacher.courses.index', [
+            'courses' => $courses
+        ]);
     }
 
     /**
@@ -68,6 +72,13 @@ class CourseController extends Controller
     public function show(Course $course)
     {
         //
+        $students = $course->students()->orderBy('id', 'DESC')->get();
+        $questions = $course->questions()->orderBy('id', 'DESC')->get();
+        return view('teacher.courses.manage', [
+            'course' => $course,
+            'students' => $students,
+            'questions' => $questions,
+        ]);
     }
 
     /**
@@ -76,6 +87,11 @@ class CourseController extends Controller
     public function edit(Course $course)
     {
         //
+        $categories = Category::all();
+        return view('teacher.courses.edit', [
+            'course' => $course,
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -84,6 +100,31 @@ class CourseController extends Controller
     public function update(Request $request, Course $course)
     {
         //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|integer',
+            'cover' => 'sometimes|image|mimes:png,jpg,jpeg',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            if ($request->hasFile('cover')) {
+                $coverPath = $request->file('cover')->store('product_cover', 'public');
+                $validated['cover'] = $coverPath;
+            }
+            $validated['slug'] = Str::slug($request->name);
+            $course->update($validated);
+            Db::commit();
+            return redirect()->route('dashboard.courses.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $error = ValidationException::withMessages([
+                'system_error' => $e->getMessage(),
+            ]);
+
+            throw $error;
+        }
     }
 
     /**
@@ -92,5 +133,16 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         //
+        try {
+            $course->delete();
+            return redirect()->route('dashboard.courses.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $error = ValidationException::withMessages([
+                'system_error' => $e->getMessage(),
+            ]);
+
+            throw $error;
+        }
     }
 }
