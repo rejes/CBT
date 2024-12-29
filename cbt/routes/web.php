@@ -1,9 +1,12 @@
 <?php
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseQuestionController;
 use App\Http\Controllers\CourseStudentController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ProfileController;
-use GuzzleHttp\Middleware;
+use App\Http\Controllers\StudentAnswerController;
+// use GuzzleHttp\Middleware;
+use App\Models\StudentAnswer;
 use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
